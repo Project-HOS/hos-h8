@@ -11,6 +11,12 @@
 ません。改変の履歴が分かるように管理していただければ有り難いです。
 
 
+HOS-H8  Ver X.XX   2002/07/27  by m-arai
+           hcfgh8hとkernelのGNU開発環境対応(ノーマルモードを含む)
+
+           秋月環境に関するノーマルモード対応は、hcfgh8hとkernelのC部分
+           のみ対応(kernelのアセンブラ部とライブラリmakefile等未完)
+
 
 HOS-H8  Ver X.XX   2002/XX/XX  by Project HOS (http://sourceforge.jp/projects/hos/)
            著作権を Project HOS に移管
