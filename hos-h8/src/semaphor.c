@@ -22,7 +22,7 @@ void __ini_sem(void)
 ER   sig_sem(ID semid)
 {
 	T_SCB  *scb;
-	T_SCBS *scbs;
+	const T_SCBS *scbs;
 	T_TCB  *tcb;
 	
 #if __ERR_CHECK_LEVEL >= 4
@@ -136,7 +136,7 @@ ER   preq_sem(ID semid)
 ER   ref_sem(T_RSEM *pk_rsem, ID semid)
 {
 	T_SCB  *scb;
-	T_SCBS *scbs;
+	const T_SCBS *scbs;
 	
 #if __ERR_CHECK_LEVEL >= 4
 	if ( semid <= 0 )

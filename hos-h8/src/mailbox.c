@@ -122,7 +122,7 @@ ER   rcv_msg(VP *pk_msg, ID mbxid)
 ER   prcv_msg(VP *pk_msg, ID mbxid)
 {
 	T_MCB  *mcb;
-	T_MCBS *mcbs;
+	const T_MCBS *mcbs;
 	
 #if __ERR_CHECK_LEVEL >= 4
 	if ( mbxid <= 0 )
@@ -158,7 +158,7 @@ ER   prcv_msg(VP *pk_msg, ID mbxid)
 ER   ref_mbx(T_RMBX *pk_rmbx, ID mbxid)
 {
 	T_MCB  *mcb;
-	T_MCBS *mcbs;
+	const T_MCBS *mcbs;
 	
 #if __ERR_CHECK_LEVEL >= 4
 	if ( mbxid <= 0 )

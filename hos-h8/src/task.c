@@ -42,6 +42,30 @@ void __ini_tsk(void)
 	}
 }
 
+/* スタック操作時のオフセット定数定義 単位はVH(WORD)*/
+#ifndef __GNUC__ /* 日立版 */
+ #ifndef __NORMAL_MODE__
+  #define POINTER_SIZE_VH		2	/* アドレスサイズ */  
+  #define CONTEXT_STACK_SIZE_VH	10	/* callee savedなレジスタ分 */
+  #define OFFSET_PARAM_VH		1	/* レジスタ分を積んだ後のパラメータへのオフセット */
+ #else
+  #define POINTER_SIZE_VH		1	/* アドレスサイズ */  
+	/* er6の下位WORDに16bitアドレスを入れる為の細工 */
+  #define CONTEXT_STACK_SIZE_VH	9	/* callee savedなレジスタ分 */
+  #define OFFSET_PARAM_VH		2	/* レジスタ分を積んだ後のパラメータへのオフセット */
+ #endif
+#else /* GNU版 */
+ #ifndef __NORMAL_MODE__
+  #define POINTER_SIZE_VH		2	/* アドレスサイズ */  
+  #define CONTEXT_STACK_SIZE_VH	8	/* callee savedなレジスタ分 */
+  #define OFFSET_PARAM_VH		1	/* レジスタ分を積んだ後のパラメータへのオフセット */
+ #else
+  #define POINTER_SIZE_VH		1	/* アドレスサイズ */  
+	/* er6の下位WORDに16bitアドレスを入れる為の細工 */
+  #define CONTEXT_STACK_SIZE_VH	7	/* callee savedなレジスタ分 */
+  #define OFFSET_PARAM_VH		2	/* レジスタ分を積んだ後のパラメータへのオフセット */
+ #endif
+#endif
 
 /* タスク開始 */
 ER sta_tsk(ID tskid, INT stacd)
@@ -84,7 +108,6 @@ ER sta_tsk(ID tskid, INT stacd)
 		const T_SPCBS *spcbs;
 		UW      spcbid;
 		VH      *stack;
-		char    buf[16];
 		
 		spcbid = (UW)tcbs->isp >> 1;
 		spcb   = &spcbtbl[spcbid];
@@ -95,7 +118,7 @@ ER sta_tsk(ID tskid, INT stacd)
 			__adt_que(&spcb->que, tcb);
 			tcb->tskstat = TTS_WAI;
 			tcb->tskwait = TTW_SPL;
-			tcb->data    = (VP)stacd;
+			tcb->data    = (VP)(UW)stacd;
 			
 			__res_imsk();
 			return E_OK;
@@ -109,11 +132,20 @@ ER sta_tsk(ID tskid, INT stacd)
 	}
 	
 	/* スタックの初期設定 */
-	tcb->sp -= 2;
+	tcb->sp -= POINTER_SIZE_VH;
+#if POINTER_SIZE_VH == 2
 	*(FP *)tcb->sp = (FP)__tskst_entry;	/* リターンアドレス */
-	tcb->sp -= 10;
+#else
+	*tcb->sp = (VH)(FP)__tskst_entry;	/* リターンアドレス */
+#endif
+	tcb->sp -= CONTEXT_STACK_SIZE_VH;
+#if POINTER_SIZE_VH == 2
 	*(FP *)tcb->sp = tcbs->task;		/* タスク開始アドレス */
-	*(--tcb->sp) = (VH)stacd;			/* 初期化コード */
+#else
+	*tcb->sp = (VH)tcbs->task;		/* タスク開始アドレス */
+#endif
+	tcb->sp -= OFFSET_PARAM_VH;
+	*(tcb->sp) = (VH)stacd;			/* 初期化コード */
 	
 	/* READYキューに追加 */
 	__adt_que(&rdyque[tcb->tskpri - 1], tcb);
@@ -159,11 +191,21 @@ void __rel_stp(T_TCB *tcb)
 		tcbnext->sp = &spcbs->stkhead[(stack + 1) * spcbs->stksz];
 		
 		/* スタックの初期設定 */
-		tcbnext->sp -= 2;
+		tcbnext->sp -= POINTER_SIZE_VH;
+#if POINTER_SIZE_VH == 2
 		*(FP *)tcbnext->sp = (FP)__tskst_entry;	/* リターンアドレス */
-		tcbnext->sp -= 10;
+#else
+		*tcbnext->sp = (VH)(FP)__tskst_entry;	/* リターンアドレス */
+#endif
+		tcbnext->sp -= CONTEXT_STACK_SIZE_VH;
+#if POINTER_SIZE_VH == 2
 		*(FP *)tcbnext->sp = tcbsnext->task;	/* タスク開始アドレス */
-		*(--tcbnext->sp) = (VH)(INT)tcbnext->data;		/* 初期化コード */
+#else
+		*tcbnext->sp = (VH)tcbsnext->task;	/* タスク開始アドレス */
+#endif
+
+		tcbnext->sp -= OFFSET_PARAM_VH;
+		*(tcbnext->sp) = (VH)(INT)tcbnext->data; /* 初期化コード */
 		
 		/* READYキューに追加 */
 		__adt_que(&rdyque[tcb->tskpri - 1], tcbnext);
@@ -180,7 +222,6 @@ void __rel_stp(T_TCB *tcb)
 /* タスク終了 */
 void ext_tsk(void)
 {
-	const T_TCBS *tcbs;
 	
 #if __ERR_CHECK_LEVEL >= 4
 	/* エラーチェック */
