@@ -3,7 +3,7 @@ SRCDIR = ../../src
 OBJS =	system.o task.o task_que.o interrup.o timer.o semaphor.o \
 	eventflg.o mailbox.o fixmem.o task_dsp.o int_asm.o
 
-LIB	= libhosv3h8hn.a
+LIB	= libh8hn.a
 
 CC	= h8300-hms-gcc
 ASM	= h8300-hms-gcc
