@@ -1,0 +1,7 @@
+INPUT   cfg_asm, cfg_c, sample, h8_sci, ..\src\hos_c, ..\src\hos_asm
+LIBRARY \akih8c\C38HAB
+OUTPUT  sample.abs
+PRINT   sample.map
+ROM     (D,X)
+START   VECT(0),P,C,D(100),X,B(0FEF10)
+EXIT

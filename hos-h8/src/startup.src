@@ -1,0 +1,60 @@
+; --------------------------------------------------------------------------- 
+;  HOS-H8 スタートアップルーチン                                              
+;                                            Copyright (C) 1998-2000 by Ryuz  
+; --------------------------------------------------------------------------- 
+
+	;	.CPU     300HA
+
+	;	.INCLUDE "extern.inc"
+
+
+		.SECTION  D,DATA,ALIGN=2
+		.SECTION  X,DATA,ALIGN=2
+		.SECTION  B,DATA,ALIGN=2
+
+		.SECTION  P,CODE,ALIGN=2
+; -------------------------------------
+;  スタートアップルーチン
+; -------------------------------------
+_hos_start:	
+	; ----- スタック初期化
+		mov.l	@___system_stack,er7
+		
+	; ----- D セクションコピー （DATAが64kbyte以下と仮定）
+		MOV.L	#(STARTOF D),ER5
+		MOV.L	#(STARTOF X),ER6
+		MOV.W	#(LWORD (SIZEOF X)),R4
+CPY_DSEC:	EEPMOV.W
+		MOV.W	R4,R4
+		BNE	CPY_DSEC
+		
+	; ----- B セクションクリア（BSSが64kbyte以下と仮定）
+		MOV.L	#(STARTOF B),ER5
+		MOV.L	#((STARTOF B)+1),ER6
+		MOV.W	#((LWORD (SIZEOF B)) - 1),R4
+		MOV.B	#0,R0L
+		MOV.B	R0L,@ER5
+CLR_BSEC:	EEPMOV.W
+		MOV.W	R4,R4
+		BNE	CLR_BSEC
+		
+	; ----- 初期化ルーチン呼び出し
+		JSR	@___initialize
+		
+		MOV.W	#H'04,R0
+		MOV.W	R0,@_sysstat	; スタートアップはタスク独立部
+		MOV.W	#H'01,R0
+		MOV.W	R0,@_int_cnt	; スタートアップは割り込み中とみなす
+		LDC.B	#H'00,CCR	; 割り込み許可
+		
+		JSR	@_start_up	; スタートアップルーチン呼び出し
+		
+		LDC.B	#H'FF, CCR	; 割り込み禁止
+		XOR.W	R0,R0
+		MOV.W	R0,@_sysstat	; 以後タスク部
+		MOV.W	R0,@_int_cnt	; 割り込みカウンタクリア
+		
+		JMP	@___tsk_dsp;	; タスクディスパッチ
+
+
+;		.END
