@@ -115,7 +115,7 @@ int main(int argc, char *argv[])
 	int  i;
 	
 	/* ロゴ表示 */
-	fprintf(stderr, "HOS-H8 Configrater\n");
+	fprintf(stderr, "HOS-H8 Configurator\n");
 	
 	/* コマンドライン解析 */
 	if ( argc > 3 ) {
