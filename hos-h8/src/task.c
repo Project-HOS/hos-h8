@@ -168,7 +168,7 @@ void __rel_stp(T_TCB *tcb)
 	UH spcbid;
 	UH stack;
 	
-	tcbs = &tcbstbl[curtcb - tcbtbl];
+	tcbs = &tcbstbl[tcb - tcbtbl];
 	
 	/* スタックプールを利用しているかどうか？ */
 	if ( !((UW)tcbs->isp & 0x00000001) )
