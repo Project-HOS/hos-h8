@@ -55,4 +55,4 @@ write:
 	$(WRITER) $(WROPT1) $(PROG).mot $(WROPT2)
 
 clean:
-	rm -f $(OBJS) $(CONFGENS) $(PROG) $(PROG).mot $(PROG).map *~
+	rm -f $(OBJS) $(CONFGENS) $(PROG_COFF) $(PROG).mot $(PROG).map *~
