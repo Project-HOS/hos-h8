@@ -73,7 +73,6 @@ ___tskst_entry:
 		.align 2
 		.global		___swc_dsp
 ___swc_dsp:	
-		push.l	er3
 		push.l	er4
 		push.l	er5
 		push.l	er6
@@ -86,7 +85,6 @@ ___swc_dsp:
 		pop.l	er6
 		pop.l	er5
 		pop.l	er4
-		pop.l	er3
 
 		rts
 
@@ -104,7 +102,6 @@ ___sta_dsp:
 		pop.l	er6
 		pop.l	er5
 		pop.l	er4
-		pop.l	er3
 
 		rts
 
@@ -117,7 +114,6 @@ ___sta_dsp:
 		.align 2
 		.global		___end_dsp
 ___end_dsp:	
-		push.l	er3
 		push.l	er4
 		push.l	er5
 		push.l	er6

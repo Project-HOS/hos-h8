@@ -57,12 +57,12 @@ void __ini_tsk(void)
 #else /* GNU版 */
  #ifndef __NORMAL_MODE__
   #define POINTER_SIZE_VH		2	/* アドレスサイズ */  
-  #define CONTEXT_STACK_SIZE_VH	8	/* callee savedなレジスタ分 */
+  #define CONTEXT_STACK_SIZE_VH	6	/* callee savedなレジスタ分 */
   #define OFFSET_PARAM_VH		1	/* レジスタ分を積んだ後のパラメータへのオフセット */
  #else
   #define POINTER_SIZE_VH		1	/* アドレスサイズ */  
 	/* er6の下位WORDに16bitアドレスを入れる為の細工 */
-  #define CONTEXT_STACK_SIZE_VH	7	/* callee savedなレジスタ分 */
+  #define CONTEXT_STACK_SIZE_VH	5	/* callee savedなレジスタ分 */
   #define OFFSET_PARAM_VH		2	/* レジスタ分を積んだ後のパラメータへのオフセット */
  #endif
 #endif
