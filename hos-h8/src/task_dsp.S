@@ -79,13 +79,8 @@ ___swc_dsp:
 		push.l	er6
 		subs	#2, er7		; リターンパラメータ用領域作成
 		mov.l	@_curtcb,er1	; GCCではpointer sizeを16bitに出来ない 
-#ifdef __NORMAL_MODE__
-		mov.w	r7,@(0, er1)	; スタックポインタ保存
-		mov.w	@(0, er0), r7	; スタックポインタ復帰
-#else
 		mov.l	er7,@(0, er1)	; スタックポインタ保存
 		mov.l	@(0, er0), er7	; スタックポインタ復帰
-#endif
 		mov.l	er0,@_curtcb	; 新TCB登録
 		pop.w	r0		; リターンパラメーター取得
 		pop.l	er6
@@ -104,11 +99,7 @@ ___swc_dsp:
 		.align 2
 		.global		___sta_dsp
 ___sta_dsp:	
-#ifdef __NORMAL_MODE__
-		mov.w	@(0, er0),r7	; スタックポインタ復帰
-#else
 		mov.l	@(0, er0),er7	; スタックポインタ復帰
-#endif
 		pop.w	r0
 		pop.l	er6
 		pop.l	er5
@@ -132,11 +123,7 @@ ___end_dsp:
 		push.l	er6
 		subs	#2, er7		; リターンパラメータ用領域作成
 		mov.l	@_curtcb,er1
-#ifdef __NORMAL_MODE__
-		mov.w	r7,@(0, er1)	; スタックポインタ保存
-#else
 		mov.l	er7,@(0, er1)	; スタックポインタ保存
-#endif
 		jmp	@___tsk_hlt	; タスク停止
 
 
