@@ -1,4 +1,8 @@
+# HOS-V3/H8hのカーネルソースディレクトリを指定
 SRCDIR = ../../src
+
+# HOS-V3/H8hのヘッダファイルを収めたディレクトリを指定
+HOSINC = ../../include
 
 OBJS =	system.o task.o task_que.o interrup.o timer.o semaphor.o \
 	eventflg.o mailbox.o fixmem.o task_dsp.o int_asm.o
@@ -11,40 +15,50 @@ OBJCOPY = h8300-hms-objcopy
 AR	= h8300-hms-ar
 RANLIB	= h8300-hms-ranlib
 
-CFLAGS	= -Os -mh -mrelax -I../../include -Wall -pipe
+CFLAGS	= -Os -mh -mrelax -I$(HOSINC) -Wall -pipe
 AFLAGS	= -mh -c
 OCFLAGS	= -O srec
 ARFLAGS	= rc
 RLFLAGS	=
 
-.SUFFIXES: .S .c .mot .coff
+all: $(LIB)
 
-.c.o:
-	${CC}  $< ${CFLAGS} -c
+$(LIB): $(OBJS)
+	$(AR) $(ARFLAGS) $(LIB) $(OBJS)
+	$(RANLIB) $(LIB)
 
-.S.o:
-	${ASM} $< ${AFLAGS} -o $@
+system.o:	$(SRCDIR)/system.c
+	$(CC)  $< $(CFLAGS) -c
 
-.mot.coff:
-	${OBJCOPY} ${OCFLAGS} $< $@
+task.o:		$(SRCDIR)/task.c
+	$(CC)  $< $(CFLAGS) -c
 
-all: ${LIB}
+task_que.o:	$(SRCDIR)/task_que.c
+	$(CC)  $< $(CFLAGS) -c
 
-${LIB}: ${OBJS}
-	${AR} ${ARFLAGS} ${LIB} ${OBJS}
-	${RANLIB} ${LIB}
+interrup.o:	$(SRCDIR)/interrup.c
+	$(CC)  $< $(CFLAGS) -c
 
-system.o:	${SRCDIR}/system.c
-task.o:		${SRCDIR}/task.c
-task_que.o:	${SRCDIR}/task_que.c
-interrup.o:	${SRCDIR}/interrup.c
-timer.o:	${SRCDIR}/timer.c
-semaphor.o:	${SRCDIR}/semaphor.c
-eventflg.o:	${SRCDIR}/eventflg.c
-mailbox.o:	${SRCDIR}/mailbox.c
-fixmem.o:	${SRCDIR}/fixmem.c
-task_dsp.o:	${SRCDIR}/task_dsp.S
-int_asm.o:	${SRCDIR}/int_asm.S
+timer.o:	$(SRCDIR)/timer.c
+	$(CC)  $< $(CFLAGS) -c
+
+semaphor.o:	$(SRCDIR)/semaphor.c
+	$(CC)  $< $(CFLAGS) -c
+
+eventflg.o:	$(SRCDIR)/eventflg.c
+	$(CC)  $< $(CFLAGS) -c
+
+mailbox.o:	$(SRCDIR)/mailbox.c
+	$(CC)  $< $(CFLAGS) -c
+
+fixmem.o:	$(SRCDIR)/fixmem.c
+	$(CC)  $< $(CFLAGS) -c
+
+task_dsp.o:	$(SRCDIR)/task_dsp.S
+	$(ASM) $< $(AFLAGS) -o $@
+
+int_asm.o:	$(SRCDIR)/int_asm.S
+	$(CC)  $< $(CFLAGS) -c
 
 clean:
-	rm -f ${OBJS} ${LIB} *~
+	rm -f $(OBJS) $(LIB) *~

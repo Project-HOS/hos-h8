@@ -1,4 +1,8 @@
+# HOS-V3/H8hのカーネルソースディレクトリを指定
 SRCDIR = ../../src
+
+# HOS-V3/H8hのヘッダファイルを収めたディレクトリを指定
+HOSINC = ../../include
 
 OBJS =	system.o task.o task_que.o interrup.o timer.o semaphor.o \
 	eventflg.o mailbox.o fixmem.o task_dsp.o int_asm.o
@@ -11,22 +15,11 @@ OBJCOPY = h8300-hms-objcopy
 AR	= h8300-hms-ar
 RANLIB	= h8300-hms-ranlib
 
-CFLAGS	= -Os -D__NORMAL_MODE__ -mh -mn -mrelax -I../../include -Wall -pipe
+CFLAGS	= -Os -D__NORMAL_MODE__ -mh -mn -mrelax -I$(HOSINC) -Wall -pipe
 AFLAGS	= -mh -D__NORMAL_MODE__ -c
 OCFLAGS	= -O srec
 ARFLAGS	= rc
 RLFLAGS	=
-
-.SUFFIXES: .S .c .mot .coff
-
-.c.o:
-	${CC}  $< ${CFLAGS} -c
-
-.S.o:
-	${ASM} $< ${AFLAGS} -o $@
-
-.mot.coff:
-	${OBJCOPY} ${OCFLAGS} $< $@
 
 all: ${LIB}
 
@@ -34,17 +27,38 @@ ${LIB}: ${OBJS}
 	${AR} ${ARFLAGS} ${LIB} ${OBJS}
 	${RANLIB} ${LIB}
 
-system.o:	${SRCDIR}/system.c
-task.o:		${SRCDIR}/task.c
-task_que.o:	${SRCDIR}/task_que.c
-interrup.o:	${SRCDIR}/interrup.c
-timer.o:	${SRCDIR}/timer.c
-semaphor.o:	${SRCDIR}/semaphor.c
-eventflg.o:	${SRCDIR}/eventflg.c
-mailbox.o:	${SRCDIR}/mailbox.c
-fixmem.o:	${SRCDIR}/fixmem.c
-task_dsp.o:	${SRCDIR}/task_dsp.S
-int_asm.o:	${SRCDIR}/int_asm.S
+system.o:	$(SRCDIR)/system.c
+	$(CC)  $< $(CFLAGS) -c
+
+task.o:		$(SRCDIR)/task.c
+	$(CC)  $< $(CFLAGS) -c
+
+task_que.o:	$(SRCDIR)/task_que.c
+	$(CC)  $< $(CFLAGS) -c
+
+interrup.o:	$(SRCDIR)/interrup.c
+	$(CC)  $< $(CFLAGS) -c
+
+timer.o:	$(SRCDIR)/timer.c
+	$(CC)  $< $(CFLAGS) -c
+
+semaphor.o:	$(SRCDIR)/semaphor.c
+	$(CC)  $< $(CFLAGS) -c
+
+eventflg.o:	$(SRCDIR)/eventflg.c
+	$(CC)  $< $(CFLAGS) -c
+
+mailbox.o:	$(SRCDIR)/mailbox.c
+	$(CC)  $< $(CFLAGS) -c
+
+fixmem.o:	$(SRCDIR)/fixmem.c
+	$(CC)  $< $(CFLAGS) -c
+
+task_dsp.o:	$(SRCDIR)/task_dsp.S
+	$(ASM) $< $(AFLAGS) -o $@
+
+int_asm.o:	$(SRCDIR)/int_asm.S
+	$(CC)  $< $(CFLAGS) -c
 
 clean:
-	rm -f ${OBJS} ${LIB} *~
+	rm -f $(OBJS) $(LIB) *~
