@@ -1,9 +1,10 @@
 /* ------------------------------------------------------------------------- */
 /*  HOS システム管理                                                         */
-/*                                          Copyright (C) 1998-2000 by Ryuz  */
+/*                                                                           */
+/*                                   Copyright (C) 1998-2002 by Project HOS  */
 /* ------------------------------------------------------------------------- */
 
-#include <itron.h>
+#include "itron.h"
 
 
 /* グローバル変数 */
@@ -15,9 +16,9 @@ UH int_cnt;		/* 割り込みのネスト数 */
 ER   get_ver(T_VER *pk_ver)
 {
 	pk_ver->maker   = 0x0000;	/* バージョンなし（実験システム) */
-	pk_ver->id      = 0x0301;	/* HOS-H8h */
+	pk_ver->id      = 0x0301;	/* HOS-H8 */
 	pk_ver->spver   = 0x5302;	/* μITRON 3.02 */
-	pk_ver->prver   = 0x0004;   /* Ver 0.04 */
+	pk_ver->prver   = 0x0100;   /* Ver 1.00 */
 	pk_ver->prno[0] = 0;
 	pk_ver->prno[1] = 0;
 	pk_ver->prno[2] = 0;

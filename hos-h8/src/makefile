@@ -23,3 +23,6 @@ hos_c.obj: $(CSRCS)
 
 hos_asm.obj: $(ASRCS)
 
+clean:
+	del *.obj
+	del *.lis

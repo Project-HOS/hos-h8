@@ -32,3 +32,6 @@ sample.obj: sample.h
 
 clean:
 	del *.obj
+	del *.lis
+	del CFG_ASM.SRC
+	del CFG_C.C

@@ -1,6 +1,7 @@
 /* ------------------------------------------------------------------------- */
-/*  HOS-H8h 用 コンフィギュレーター Ver 1.00                                 */
-/*                                          Copyright (C) 1998-2000 by Ryuz  */
+/*  HOS-H8 用 コンフィギュレーター                                           */
+/*                                                                           */
+/*                                   Copyright (C) 1998-2002 by Project HOS  */
 /* ------------------------------------------------------------------------- */
 
 #include <stdio.h>
@@ -114,7 +115,7 @@ int main(int argc, char *argv[])
 	int  i;
 	
 	/* ロゴ表示 */
-	fprintf(stderr, "HOS-H8h Configrater Ver1.01 by Ryuz\n");
+	fprintf(stderr, "HOS-H8 Configrater\n");
 	
 	/* コマンドライン解析 */
 	if ( argc > 3 ) {
@@ -223,7 +224,7 @@ void Write_Def_ID(void)
 		exit(1);
 	}
 	
-	fprintf(fp, "/* HOS-H8h configuration-file to define ID */\n\n");
+	fprintf(fp, "/* HOS-H8 configuration-file to define ID */\n\n");
 	fprintf(fp, "#ifndef __HOSCFG__DEFID_H_\n");
 	fprintf(fp, "#define __HOSCFG__DEFID_H_\n\n\n");
 	
@@ -291,7 +292,7 @@ void Write_C_Cfg(void)
 	fprintf(fp, "/* HOS-H8用 コンフィギュレーションファイルＣ言語部 */\n\n");
 	
 	/* インクルードファイル出力 */
-	fprintf(fp, "#include <itron.h>\n");
+	fprintf(fp, "#include \"itron.h\"\n");
 	fprintf(fp, "#include \"%s\"\n", szDefCFile);
 	for ( i = 0; i < nIncCCount; i++ )
 		fprintf(fp, "#include %s\n", ppIncludeCTable[i]);

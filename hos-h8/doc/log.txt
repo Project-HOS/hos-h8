@@ -12,13 +12,13 @@
 
 
 
-HOS-H8  Ver X.XX   2002/XX/XX  by Project HOS (http://sourceforge.jp/projects/hos/)
+HOS-H8  Ver 1.00   2002/XX/XX  by Project HOS (http://sourceforge.jp/projects/hos/)
    ・著作権を Project HOS に移管
    ・hcfgh8hとkernelのGNU開発環境対応(ノーマルモードを含む) by m-arai
    ・ 秋月環境に関するノーマルモード対応は、hcfgh8hとkernelのC部分
       のみ対応(kernelのアセンブラ部とライブラリmakefile等未完)  by m-arai
    ・hos_c.c の #include "interrup.c" 抜け修正(バグレポ 藤田様) by Ryuz
-
+   ・#include <itron.h> を #include "itron.h" に修正
 
 HOS-H8h Ver 0.07   2000/08/15  by Ryuz(QZF06013@nifty.ne.jp)
    ・イベントフラグバグ修正（バグレポ k-sasaki氏）

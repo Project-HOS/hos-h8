@@ -1,5 +1,5 @@
-#ifndef __RYUZ_H8_SCI_H_
-#define __RYUZ_H8_SCI_H_
+#ifndef __PROJECT_HOS__H8_SCI_H_
+#define __PROJECT_HOS__H8_SCI_H_
 
 
 /* SCI通信速度定義 (16MHzのとき) */
@@ -23,4 +23,4 @@ void SCI_Puts(const char* str);		/* 文字列出力 */
 void SCI_Gets(char* buf);			/* 文字列入力 */
 
 
-#endif /* __RYUZ_H8_SCI_H_ */
+#endif /* __PROJECT_HOS__H8_SCI_H_ */
