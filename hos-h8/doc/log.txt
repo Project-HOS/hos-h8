@@ -20,6 +20,10 @@ HOS-H8  Ver X.XX   2002/XX/XX  by Project HOS (http://sourceforge.jp/projects/ho
    ・hos_c.c の #include "interrup.c" 抜け修正(バグレポ 藤田様) by Ryuz
 
 
+HOS-H8h Ver 0.07   2000/08/15  by Ryuz(QZF06013@nifty.ne.jp)
+   ・イベントフラグバグ修正（バグレポ k-sasaki氏）
+
+
 HOS-H8h Ver 0.06   2000/08/15  by Ryuz(QZF06013@nifty.ne.jp)
    ・ref_tsk で TSK_SELF 指定時のバグを修正
    ・アセンブリのソースに .CPU 指定を追加、コンフィギュレータも修正
