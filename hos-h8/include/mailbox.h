@@ -12,7 +12,7 @@
 /*              型定義                  */
 /* ------------------------------------ */
 
-typedef VP T_MSG;	/* ヘッダは利用しない */
+typedef void T_MSG;	/* ヘッダは利用しない */
 
 /* MCB(MailBoxコントロールブロック) 動的部分 RAMに置く */
 typedef struct t_mcb {
