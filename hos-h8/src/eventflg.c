@@ -34,6 +34,7 @@ ER   set_flg(ID flgid, UB setptn)
 {
 	T_FCB *fcb;
 	T_TCB *tcb;
+	T_TCB *tcbNext;
 	UB    old_syssat;
 	BOOL  reqdsp;
 	
@@ -62,11 +63,12 @@ ER   set_flg(ID flgid, UB setptn)
 		/* フラグの一致するタスクを全て起床 */
 		tcb = fcb->que.head;
 		do {
+			tcbNext = tcb->next;
 			if ( __chk_flg(fcb, (T_WFLG_STAT *)tcb->data) ) {
 				__wup_dsp(tcb, E_OK);
 				reqdsp = TRUE;
 			}
-			tcb = tcb->next;
+			tcb = tcbNext;
 		} while ( tcb != fcb->que.head );
 		
 		/* 状態復帰 */
@@ -138,6 +140,9 @@ ER   wai_flg(UB *p_flgptn, ID flgid, UB waiptn, UB wfmode)
 	}
 #endif
 	
+	if ( p_flgptn != NADR )
+		*p_flgptn = fcb->flgptn;
+	
 	/* フラグチェック */
 	wflg_stat.waiptn = waiptn;
 	wflg_stat.wfmode = wfmode;
@@ -155,9 +160,6 @@ ER   wai_flg(UB *p_flgptn, ID flgid, UB waiptn, UB wfmode)
 	
 	/* ディスパッチ */
 	ercd = __tsk_dsp();
-	
-	if ( p_flgptn != NADR )
-		*p_flgptn = fcb->flgptn;
 	
 	__res_imsk();
 	
