@@ -18,7 +18,6 @@
 #define MAX_PATH   		256		/* 最大パス名 */
 #define MAX_PARAMETER     6     /* 最大パラメーター数 */
 #define MAX_ID          255     /* 最大ＩＤ数 */
-#define MAX_INT          64		/* 最大割り込み番号 */
 #define MAX_INCLUDE_C    64		/* 最大読み込みファイル数(Ｃ言語用) */
 
 
@@ -56,12 +55,24 @@ void Write_Asm_Cfg(void);		/* アセンブリ言語部出力 */
 /* ------------------------------------ */
 
 char szCfgFile[MAX_PATH]  = "hos.cfg";		/* コンフィグレーションファイル */
+#ifdef __USE_CROSS_GCC__
+char szAsmFile[MAX_PATH]  = "cfg_asm.s";	/* アセンブリ言語出力ファイル名 */
+#else
 char szAsmFile[MAX_PATH]  = "cfg_asm.src";	/* アセンブリ言語出力ファイル名 */
+#endif
 char szCFile[MAX_PATH]    = "cfg_c.c";		/* Ｃ言語出力ファイル名 */
 char szDefCFile[MAX_PATH] = "defid.h";		/* 定数定義ヘッダファイル名 */
 
 int  nLine;			/* 解析中の行番号 */
 int  bErr = FALSE;	/* エラー */
+
+#define ADVANCED 0
+#define NORMAL   1
+int  Mode = ADVANCED;
+
+#define MAX_INT_ADVANCED  64		/* 最大割り込み番号 */
+#define MAX_INT_TINY	  26		/* TINY 対応        */
+int maxInt = MAX_INT_ADVANCED;
 
 char *pMaxTskPri = NULL;		/* 最大優先度(デフォルトで８) */
 
@@ -72,7 +83,7 @@ char **pppSemTable[MAX_ID];		/* セマフォ生成データテーブル */
 char **pppFlgTable[MAX_ID];		/* イベントフラグ生成データテーブル */
 char **pppMbxTable[MAX_ID];		/* メッセージボックス生成データテーブル */
 char **pppMpfTable[MAX_ID];		/* 固定長メモリプール生成データテーブル */
-char *ppIntTable[MAX_INT];		/* 割り込みベクタのテーブル */
+char *ppIntTable[MAX_INT_ADVANCED];		/* 割り込みベクタのテーブル */
 int  nTaskCount;	/* タスクの数 */
 int  nSplCount;		/* スタックプールの数 */
 int  nSemCount;		/* セマフォの数 */
@@ -83,7 +94,9 @@ int  nMpfCount;		/* 固定長メモリプールの数 */
 char *ppIncludeCTable[MAX_INCLUDE_C];	/* Ｃ言語のインクルードファイル */
 int  nIncCCount;		/* Ｃ言語インクルードファイル数 */
 
-unsigned long SystemStack = 0xfff10;	/* システムスタックのアドレス */
+#define SYSSTACK_ADV  0xfff10
+#define SYSSTACK_TINY 0xff80
+unsigned long SystemStack = SYSSTACK_ADV; /* システムスタックのアドレス */
 
 int  bUseTimer = TRUE;		/* タイマを使うかどうか */
 
@@ -104,9 +117,21 @@ int main(int argc, char *argv[])
 	fprintf(stderr, "HOS-H8h Configrater Ver1.01 by Ryuz\n");
 	
 	/* コマンドライン解析 */
-	if ( argc == 2 )
-		strcpy(szCfgFile, argv[1]);
-	
+	if ( argc > 3 ) {
+		fprintf(stderr,"Usage: %s [[-t] config_file]\n", argv[0]);
+		exit(1);
+	}
+
+	/* ノーマルモード */
+	if ( argc > 1) {
+		if ( (i = strcmp( argv[1], "-n")) == 0) {
+			Mode   = NORMAL;
+			maxInt = MAX_INT_TINY;
+			SystemStack = SYSSTACK_TINY;
+		}
+		if ( argc == 3 || Mode == ADVANCED )
+			strcpy(szCfgFile, argv[argc-1]);
+	}
 	
 	/* ファイルオープン */
 	if ( (fp = fopen(szCfgFile, "r")) == NULL ) {
@@ -172,7 +197,7 @@ int main(int argc, char *argv[])
 	FreeTable(pppMbxTable);
 	FreeTable(pppMpfTable);
 	if ( pMaxTskPri != NULL )  free(pMaxTskPri);
-	for ( i = 0; i < MAX_INT; i++ )
+	for ( i = 0; i < maxInt; i++ )
 		if ( ppIntTable[i] != NULL )  free(ppIntTable[i]);
 	for ( i = 0; i < MAX_INCLUDE_C; i++ )
 		if ( ppIncludeCTable[i] != NULL )  free(ppIncludeCTable[i]);
@@ -369,7 +394,7 @@ void Write_C_Cfg(void)
 				if ( pppTaskTable[i][5] == NULL ) {
 					/* 自前でスタックを持つ */
 					fprintf(fp, "\t\t"
-								"{%s, %s, %s, &Stack%d[(%s) / 2]}",
+								"{(VP)%s, %s, %s, &Stack%d[(%s) / 2]}",
 								pppTaskTable[i][1],
 								pppTaskTable[i][2],
 								pppTaskTable[i][3],
@@ -380,7 +405,7 @@ void Write_C_Cfg(void)
 				else {
 					/* スタックプールを使う */
 					fprintf(fp, "\t\t"
-								"{%s, %s, %s, (VH*)(((%s) - 1) * 2 + 1)}",
+								"{(VP)%s, %s, %s, (VH*)(((%s) - 1) * 2 + 1)}",
 								pppTaskTable[i][1],
 								pppTaskTable[i][2],
 								pppTaskTable[i][3],
@@ -577,12 +602,14 @@ void Write_Asm_Cfg(void)
 	}
 	
 	/* IMPORT宣言出力 */
-	fprintf(fp, "; コンフィギュレーター アセンブラ部\n\n"
-				"\t\t.CPU     300HA\n\n"
+	fprintf(fp, "; コンフィギュレーター アセンブラ部\n\n");
+#ifndef __USE_CROSS_GCC__
+	fprintf(fp, 		"\t\t.CPU     %s\n\n"
 				"\t\t.IMPORT\t_hos_start\n"
 				"\t\t.IMPORT\t_int_default\n"
-				"\t\t.IMPORT\t_int_trap\n");
-	for ( i = 1; i < MAX_INT; i++ ) {
+				"\t\t.IMPORT\t_int_trap\n",
+				Mode == ADVANCED ? "300HA": "300HN");
+	for ( i = 1; i < maxInt; i++ ) {
 		if ( ppIntTable[i] != NULL )
 			fprintf(fp, "\t\t.IMPORT\t_%s\n", ppIntTable[i]);
 	}
@@ -592,33 +619,52 @@ void Write_Asm_Cfg(void)
 				"; -----------------------------------------------\n"
 				";          割り込みベクタテーブル\n"
 				"; -----------------------------------------------\n"
-				"\t\t.DATA.L\t_hos_start\n");
-	for ( i = 1; i < MAX_INT; i++ ) {
+				"\t\t.DATA.%c\t_hos_start\n",
+				Mode == ADVANCED ? 'L': 'W');
+	for ( i = 1; i < maxInt; i++ ) {
 		if ( ppIntTable[i] != NULL ) {
-			fprintf(fp, "\t\t.DATA.L\tINT%02X\n", i);
+			fprintf(fp, "\t\t.DATA.%c\tINT%02X\n",
+				Mode == ADVANCED ? 'L': 'W', i);
 		}
 		else {
-			fprintf(fp, "\t\t.DATA.L\t_int_default\n");
+			fprintf(fp, "\t\t.DATA.%c\t_int_default\n",
+				Mode == ADVANCED ? 'L': 'W');
 		}
 	}
-	
+#endif	 /* __USE_CROSS_GCC_ */
 	/* 割り込みハンドラ出力 */
 	fprintf(fp,
+#ifdef __USE_CROSS_GCC__
+				"\t\t.h8300h\n"
+#else
 				"\n\n\t\t.SECTION  P,CODE,ALIGN=2\n\n"
+#endif
 				"; -----------------------------------------------\n"
 				";          割り込みハンドラ\n"
 				"; -----------------------------------------------\n\n"
 			);
-	for ( i = 1; i < MAX_INT; i++ ) {
+	for ( i = 1; i < maxInt; i++ ) {
 		if ( ppIntTable[i] != NULL ) {
-			fprintf(fp, "INT%02X:\t\tPUSH.L\tER1\n"
-						"\t\tMOV.L\t#_%s,ER1\n"
-						"\t\tjmp\t@_int_trap\n\n", i, ppIntTable[i]);
+			fprintf(fp,
+#ifdef __USE_CROSS_GCC__
+				"\t\t.global\tint%02x\nint%02x:\t\tpush.l\ter1\n"
+				"\t\tmov.%c\t#_%s,%s1\n"
+				"\t\tjmp\t@_int_trap\n\n",
+				i , i, Mode == ADVANCED ? 'l': 'w' ,
+				ppIntTable[i], Mode == ADVANCED ? "er": "r");
+#else
+				"INT%02X:\t\tPUSH.L\tER1\n"
+				"\t\tMOV.%c\t#_%s,%s1\n"
+				"\t\tjmp\t@_int_trap\n\n",
+				i , Mode == ADVANCED ? 'L': 'W' ,
+				ppIntTable[i], Mode == ADVANCED ? "ER": "R");
+#endif
 		}
 	}
 	
 	
 	/* テーブルが無い場合 Warning 対策にアドレスのみ割り振り */
+#ifndef __USE_CROSS_GCC__
 	if ( nTaskCount == 0 || nSplCount == 0 || nSemCount == 0
 			|| nFlgCount == 0 || nMbxCount == 0 || nMpfCount == 0 ) {
 		fprintf(fp, "\n\n");
@@ -664,7 +710,9 @@ void Write_Asm_Cfg(void)
 	}
 	
 	fprintf(fp, "\n\n\t\t.END\n");
-	
+#else
+	fprintf(fp, "\n\n\t\t.end\n");
+#endif	
 	fclose(fp);
 }
 
@@ -749,7 +797,7 @@ void AnalizeDefInt(char *pBuf)
 
 	/* 割り込み番号チェック */
 	if ( !StrToInt(&nIntNum, ppPara[0])
-			|| nIntNum < 1 || nIntNum >= MAX_INT ) {
+			|| nIntNum < 1 || nIntNum >= maxInt ) {
 		/* 割り込み番号が不正 */
 		fprintf(stdout, "line(%d): illegal intrrupt-number.\n", nLine);
 		if ( ppPara[0] != NULL )  free(ppPara[0]);
