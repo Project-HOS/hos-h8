@@ -665,10 +665,10 @@ void Write_Asm_Cfg(void)
 	
 	
 	/* テーブルが無い場合 Warning 対策にアドレスのみ割り振り */
-#ifndef __USE_CROSS_GCC__
 	if ( nTaskCount == 0 || nSplCount == 0 || nSemCount == 0
 			|| nFlgCount == 0 || nMbxCount == 0 || nMpfCount == 0 ) {
 		fprintf(fp, "\n\n");
+#ifndef __USE_CROSS_GCC__
 		if ( nSplCount == 0 )
 			fprintf(fp,"\t\t.EXPORT\t_spcbtbl\n"
 						"\t\t.EXPORT\t_spcbstbl\n");
@@ -689,7 +689,28 @@ void Write_Asm_Cfg(void)
 						"\t\t.EXPORT\t_fmcbstbl\n");
 		
 		fprintf(fp,"\n\n\t\t.SECTION  C,DATA,ALIGN=2\n\n");
+#else
+		if ( nSplCount == 0 )
+			fprintf(fp,"\t\t.global\t_spcbtbl\n"
+						"\t\t.global\t_spcbstbl\n");
+		if ( nTaskCount == 0 )
+			fprintf(fp,"\t\t.global\t_tcbtbl\n"
+						"\t\t.global\t_tcbstbl\n");
+		if ( nSemCount == 0 )
+			fprintf(fp,"\t\t.global\t_scbtbl\n"
+						"\t\t.global\t_scbstbl\n");
+		if ( nFlgCount == 0 )
+			fprintf(fp,"\t\t.global\t_fcbtbl\n"
+						"\t\t.global\t_fcbstbl\n");
+		if ( nMbxCount == 0 )
+			fprintf(fp,"\t\t.global\t_mcbtbl\n"
+						"\t\t.global\t_mcbstbl\n");
+		if ( nMpfCount == 0 )
+			fprintf(fp,"\t\t.global\t_fmcbtbl\n"
+						"\t\t.global\t_fmcbstbl\n");
 		
+		fprintf(fp,"\n\n\t\t.data\n\n");
+#endif		
 		if ( nSplCount == 0 )
 			fprintf(fp, "_spcbtbl:\n"
 						"_spcbstbl:\n");
@@ -710,6 +731,7 @@ void Write_Asm_Cfg(void)
 						"_fmcbstbl:\n");
 	}
 	
+#ifndef __USE_CROSS_GCC__
 	fprintf(fp, "\n\n\t\t.END\n");
 #else
 	fprintf(fp, "\n\n\t\t.end\n");
