@@ -658,7 +658,7 @@ ER   slp_tsk(void)
 	
 #if __ERR_CHECK_LEVEL >= 3
 	/* エラーチェック */
-	if( sysstat != 0 )
+	if( sysstat != TSS_TSK )
 		return E_CTX;
 #endif
 	
@@ -781,7 +781,7 @@ ER  __tsk_dsp(void)
 	/* ディスパッチ可能か */
 	if ( sysstat != TSS_TSK ) {
 		dlydsp = TRUE;
-		return 0;
+		return E_CTX;
 	}
 	
 	/* ディスパッチ実行 */
@@ -808,7 +808,7 @@ ER  __tsk_dsp(void)
 			}
 			else {
 				if ( tcb == curtcb )
-					return 0;
+					return E_OK;
 				if ( curtcb->tskstat == TTS_RUN )
 					curtcb->tskstat = TTS_RDY;
 				return __swc_dsp(tcb);		/* タスク切り替え */

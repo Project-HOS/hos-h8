@@ -135,7 +135,7 @@ ER   wai_flg(UB *p_flgptn, ID flgid, UB waiptn, UB wfmode)
 	
 #if __ERR_CHECK_LEVEL >= 3
 	/* 状態チェック */
-	if ( sysstat != 0 ) {
+	if ( sysstat != TSS_TSK ) {
 		__res_imsk();
 		return E_CTX;
 	}
