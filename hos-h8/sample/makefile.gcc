@@ -1,0 +1,57 @@
+# GNU環境用makefile
+
+PROG	= sample
+
+# HOSヘッダファイルを収めたディレクトリ
+HOSINC  = ../include
+
+# HOSカーネルライブラリを収めたディレクトリ
+HOSLIBDIR = ../lib/h83hgcc
+
+# HOSのコンフィグレータ(__USE_CROSS_GCC__を定義してhcfgh8h.cをコンパイル)
+HOSCONF	= ../config/hcfgh8h
+
+# みついわ氏の書き込みソフトを使用する場合(http://www.linet.gr.jp/~mituiwa/)
+WRITER  = h8write
+WROPT1	= -3048
+WROPT2  = /dev/cuaa0
+
+OBJS	= cfg_asm.o cfg_c.o sample.o h8_sci.o startup.o
+LIBS	= -lh8h
+LDSCRIPT= h83048.x
+
+CC	= h8300-hms-gcc
+ASM	= h8300-hms-as
+LD	= h8300-hms-gcc
+OBJCOPY = h8300-hms-objcopy
+
+HOSCFGFILE = hos.cfg
+CONFGENS   = cfg_asm.s cfg_c.c defid.h
+
+CFLAGS	= -Os -Wall -mh  -I$(HOSINC) -pipe
+AFLAGS	=
+LDFLAGS = -mh -nostartfiles -Wl,-Map,$(PROG).map -Wl,-T$(LDSCRIPT) -L$(HOSLIBDIR) -pipe
+OCFLAGS	= -O srec
+
+.SUFFIXES: .s .c .a
+
+.c.o:
+	$(CC)  $< $(CFLAGS) -c
+
+.s.o:
+	$(ASM) $< $(AFLAGS) -o $@
+
+all: $(PROG)
+
+$(CONFGENS): $(HOSCFGFILE)
+	$(HOSCONF) $(HOSCFGFILE)
+
+$(PROG): $(OBJS) $(LDSCRIPT)
+	$(LD) $(LDFLAGS) -o $(PROG) $(OBJS) $(LIBS)
+	$(OBJCOPY) $(OCFLAGS) $(PROG) $(PROG).mot
+
+write:
+	$(WRITER) $(WROPT1) $(PROG).mot $(WROPT2)
+
+clean:
+	rm -f $(OBJS) $(CONFGENS) $(PROG) $(PROG).mot $(PROG).map *~
