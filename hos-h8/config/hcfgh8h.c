@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
 	
 	/* コマンドライン解析 */
 	if ( argc > 3 ) {
-		fprintf(stderr,"Usage: %s [[-t] config_file]\n", argv[0]);
+		fprintf(stderr,"Usage: %s [[-n] config_file]\n-n  normal mode.\n", argv[0]);
 		exit(1);
 	}
 
