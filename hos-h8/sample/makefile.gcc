@@ -1,6 +1,7 @@
 # GNU環境用makefile
 
-PROG	= sample
+PROG	  = sample
+PROG_COFF = $(PROG).coff
 
 # HOSヘッダファイルを収めたディレクトリ
 HOSINC  = ../include
@@ -41,14 +42,14 @@ OCFLAGS	= -O srec
 .s.o:
 	$(ASM) $< $(AFLAGS) -o $@
 
-all: $(PROG)
+all: $(PROG_COFF)
 
 $(CONFGENS): $(HOSCFGFILE)
 	$(HOSCONF) $(HOSCFGFILE)
 
-$(PROG): $(OBJS) $(LDSCRIPT)
-	$(LD) $(LDFLAGS) -o $(PROG) $(OBJS) $(LIBS)
-	$(OBJCOPY) $(OCFLAGS) $(PROG) $(PROG).mot
+$(PROG_COFF): $(OBJS) $(LDSCRIPT)
+	$(LD) $(LDFLAGS) -o $(PROG_COFF) $(OBJS) $(LIBS)
+	$(OBJCOPY) $(OCFLAGS) $(PROG_COFF) $(PROG).mot
 
 write:
 	$(WRITER) $(WROPT1) $(PROG).mot $(WROPT2)
